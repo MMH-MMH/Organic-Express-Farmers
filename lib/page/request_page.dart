@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:localstorage/localstorage.dart';
+
 import 'package:organic/widget/container_with_bordertext.dart';
-import 'package:organic/widget/feature_text.dart';
+
 import 'package:organic/widget/profile_pic.dart';
 import 'package:organic/widget/request_list_child.dart';
 import 'package:organic/widget/search_bar.dart';
@@ -10,6 +12,66 @@ class RequestPage extends StatefulWidget {
 }
 
 class RequestPageState extends State<RequestPage> {
+  String contact, name;
+
+  LocalStorage storage = LocalStorage('organic');
+
+  void logout() {
+    storage.deleteItem('name');
+    storage.deleteItem('contact');
+    Navigator.of(context).pushNamed("/");
+  }
+
+  void check() {
+    print("Check $contact");
+    if (contact == null) {
+      showDialog(
+        barrierDismissible: false,
+        context: context,
+        builder: (BuildContext context) {
+          return Dialog(
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+            elevation: 16,
+            child: Container(
+              height: MediaQuery.of(context).size.height * 0.7,
+              width: MediaQuery.of(context).size.height * 0.8,
+              child: Container(
+                child: Column(
+                  children: <Widget>[
+                    Text(
+                      "Your contact is not registered yet",
+                      style: TextStyle(
+                        color: Colors.red,
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    SizedBox(height: 10),
+                    ElevatedButton(
+                        child: Text("Click here to register"),
+                        onPressed: () {
+                          Navigator.of(context).pushNamed('/register_page');
+                        }),
+                    SizedBox(height: 10),
+                  ],
+                ),
+              ),
+            ),
+          );
+        },
+      );
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    name = storage.getItem('name');
+
+    name = (name == null) ? "username" : name;
+  }
+
   @override
   Widget build(BuildContext context) {
     return new Scaffold(
@@ -27,6 +89,15 @@ class RequestPageState extends State<RequestPage> {
               child: new Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
+                  Align(
+                    alignment: Alignment.topRight,
+                    child: IconButton(
+                      icon: Icon(Icons.logout),
+                      onPressed: logout,
+                      tooltip: "Logout",
+                    ),
+                  ),
+
                   // Search Bar
                   SearchBar(),
 
@@ -49,7 +120,7 @@ class RequestPageState extends State<RequestPage> {
                   ),
                   Center(
                     child: Text(
-                      "Mukesh,",
+                      name,
                       style: TextStyle(
                         fontSize: 20,
                         color: Colors.black87,
@@ -127,6 +198,9 @@ class RequestPageState extends State<RequestPage> {
                 ],
               ),
             ),
+            // ((storage.getItem('name') == null)
+            //     ? (Navigator.of(context).pushNamed('/register_page'))
+            //     : (SizedBox(height: 1))),
           ],
         ),
       ),

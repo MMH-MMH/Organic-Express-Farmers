@@ -1,4 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
+import 'package:localstorage/localstorage.dart';
+import 'package:organic/methods/registerredirect.dart';
+import 'package:organic/services/authservice.dart';
+import 'package:organic/widget/liscenseAndAgreements.dart';
 import 'package:organic/widget/next_page_button.dart';
 import 'package:organic/widget/profile_pic.dart';
 import 'package:organic/widget/text_field.dart';
@@ -8,12 +13,58 @@ class RegisterDetailPage extends StatefulWidget {
 }
 
 class RegisterDetailPageState extends State<RegisterDetailPage> {
-  bool gpsCheck = false;
-  bool agreementCheck = false;
+  bool agreementCheck = false, organicCheck = false, inorganicCheck = false;
+  List<String> farmingType = [];
 
-  void gpsCheckFunction(bool gpsCheckCurrent) {
+  LocalStorage storage = LocalStorage('organic');
+  String contact;
+
+  Widget nullContact;
+
+  var data = {
+    "name": "",
+    "costAdd": "",
+    "anotherNumber": "",
+    "landSize": "",
+    "cropsList": "",
+    "certificateNumber": "",
+    "farmingType": [],
+    "contact": "",
+  };
+
+  List<String> reqFields = [
+    "name",
+    "costAdd",
+    "landSize",
+    "cropList",
+    "certificateNumber",
+    "darmingType",
+    "contact"
+  ];
+
+  ////   SOME METHODS //////////
+
+  bool validForm() {
+    for (String x in reqFields) {
+      if ((data[x].toString()).length == 0) {
+        print("validation: false");
+        return false;
+      }
+    }
+    return (agreementCheck == true);
+  }
+
+  void check() {
+    Methods().redirectToRegister(contact, context);
+  }
+
+  @override
+  void initState() {
+    super.initState();
     setState(() {
-      gpsCheck = !gpsCheck;
+      contact = storage.getItem('contact');
+      storage.deleteItem('contact');
+      data["contact"] = contact;
     });
   }
 
@@ -23,21 +74,66 @@ class RegisterDetailPageState extends State<RegisterDetailPage> {
     });
   }
 
+  void organicCheckFunction(bool organicCheckCurrent) {
+    setState(() {
+      organicCheck = !organicCheck;
+      if (organicCheck)
+        farmingType.add("Organic");
+      else
+        farmingType.remove("Organic");
+
+      data["farmingType"] = farmingType;
+    });
+  }
+
+  void inorganicCheckFunction(bool inorganicCheckCurrent) {
+    setState(() {
+      inorganicCheck = !inorganicCheck;
+      if (inorganicCheck)
+        farmingType.add("Inorganic");
+      else
+        farmingType.remove("Inorganic");
+
+      data["farmingType"] = farmingType;
+    });
+  }
+
+  void navigatorFuntion() async {
+    print("contact -- $contact");
+    var res;
+    if (contact == null) {
+      Fluttertoast.showToast(
+        msg: "First verify your Contact in previous step",
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.BOTTOM,
+        backgroundColor: Colors.red,
+        textColor: Colors.white,
+        fontSize: 10,
+      );
+      Navigator.of(context).pushNamed("/register_page");
+    } else {
+      res = await AuthService().register(data);
+      if (storage.getItem('contact') != null) {
+        storage.deleteItem('contact');
+      }
+      if (storage.getItem('name') != null) {
+        storage.deleteItem('name');
+      }
+      if (res == false) {
+        Navigator.of(context).pop();
+        Navigator.of(context).pushNamed("/register_page");
+      } else {
+        storage.setItem('contact', data['contact']);
+        storage.setItem('name', data['name']);
+        Navigator.of(context).pop();
+        Navigator.of(context).pushNamed("/request_page");
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    Color getGpsColor(Set<MaterialState> states) {
-      const Set<MaterialState> interactiveStates = <MaterialState>{
-        MaterialState.pressed,
-        MaterialState.hovered,
-        MaterialState.focused,
-      };
-      if (states.any(interactiveStates.contains)) {
-        return Colors.black;
-      }
-      return Colors.teal;
-    }
-
-    Color getAgreementColor(Set<MaterialState> states) {
+    Color checkboxColor(Set<MaterialState> states) {
       const Set<MaterialState> interactiveStates = <MaterialState>{
         MaterialState.pressed,
         MaterialState.hovered,
@@ -61,6 +157,7 @@ class RegisterDetailPageState extends State<RegisterDetailPage> {
                 new SizedBox(
                   height: 50,
                 ),
+
                 // Add Profile Picture
                 new ClipRRect(
                   borderRadius: BorderRadius.all(
@@ -81,57 +178,98 @@ class RegisterDetailPageState extends State<RegisterDetailPage> {
                 // Name of User
 
                 CustomTextField(
-                  "Name",
-                  "Full Name",
+                  "Name*", // labeltext
+                  "", // hinttext
                   false, // isPassword
+                  (val) {
+                    check();
+                    // onChnaged
+                    data["name"] = val;
+                  },
                 ),
 
                 new SizedBox(
                   height: 30.0,
                 ),
-
-                //  DOB of User
 
                 CustomTextField(
-                  "Date of Birth",
-                  "DD/MM/YYYY",
-                  false, // isPassword
+                  "Cost Add*", "", false, // isPassword
+                  (val) {
+                    data["costAdd"] = val;
+                  },
                 ),
 
                 new SizedBox(
                   height: 30.0,
                 ),
-
-                //  Contact of User
 
                 CustomTextField(
-                  "Mobile no.",
-                  "",
-                  false, // isPassword
+                  "Another number", "", false, // isPassword
+                  (val) {
+                    data["anotherNumber"] = val;
+                  },
                 ),
 
                 new SizedBox(
                   height: 30.0,
                 ),
-
-                //  DOB of User
 
                 CustomTextField(
-                  "Address",
-                  "State/City",
-                  false, // isPassword
+                  "Land Size*", "", false, // isPassword
+                  (val) {
+                    data["landSize"] = val;
+                  },
                 ),
 
                 new SizedBox(
                   height: 30.0,
                 ),
 
-                // GPS
+                // //////// CROPS YOU GROW ////////
+
+                CustomTextField(
+                  "Crops you grow*", "", false, // isPassword
+                  (val) {
+                    data["cropsList"] = val;
+                  },
+                ),
+
+                new SizedBox(
+                  height: 5.0,
+                ),
+
+                Align(
+                  alignment: Alignment.topLeft,
+                  child: Text(
+                    "If you grow rice and wheat, enter rice,wheat",
+                    style: TextStyle(
+                      color: Colors.grey,
+                    ),
+                  ),
+                ),
+
+                new SizedBox(
+                  height: 30.0,
+                ),
+
+                // //////// SELECT INORGANIC/ORGANIC      ////////   ////////
+                Align(
+                  alignment: Alignment.topLeft,
+                  child: Text(
+                    "Choose you farming type*",
+                    style: TextStyle(
+                      color: Colors.black,
+                      fontSize: 18,
+                    ),
+                  ),
+                ),
+
+                SizedBox(height: 10),
 
                 new Row(
                   children: <Widget>[
                     new Text(
-                      "GPS",
+                      "Organic",
                       style: TextStyle(
                         fontSize: 18.0,
                       ),
@@ -140,12 +278,47 @@ class RegisterDetailPageState extends State<RegisterDetailPage> {
                       padding: EdgeInsets.only(right: 10.0),
                     ),
                     new Checkbox(
-                      value: gpsCheck,
+                      value: organicCheck,
                       checkColor: Colors.white,
-                      fillColor: MaterialStateProperty.resolveWith(getGpsColor),
-                      onChanged: gpsCheckFunction,
+                      fillColor:
+                          MaterialStateProperty.resolveWith(checkboxColor),
+                      onChanged: organicCheckFunction,
                     ),
                   ],
+                ),
+
+                new Row(
+                  children: <Widget>[
+                    new Text(
+                      "Inrganic",
+                      style: TextStyle(
+                        fontSize: 18.0,
+                      ),
+                    ),
+                    new Padding(
+                      padding: EdgeInsets.only(right: 10.0),
+                    ),
+                    new Checkbox(
+                      value: inorganicCheck,
+                      checkColor: Colors.white,
+                      fillColor:
+                          MaterialStateProperty.resolveWith(checkboxColor),
+                      onChanged: inorganicCheckFunction,
+                    ),
+                  ],
+                ),
+
+                SizedBox(height: 30),
+
+                ////////// CERTIFICATE NUMBER ///////////
+
+                CustomTextField(
+                  "Certificate Number*",
+                  "",
+                  false,
+                  (val) {
+                    data["certificateNumber"] = val;
+                  },
                 ),
 
                 new SizedBox(
@@ -154,30 +327,38 @@ class RegisterDetailPageState extends State<RegisterDetailPage> {
 
                 // Terms and Conditions
 
-                new Row(
-                  children: <Widget>[
-                    new Checkbox(
-                      value: agreementCheck,
-                      checkColor: Colors.white,
-                      fillColor:
-                          MaterialStateProperty.resolveWith(getAgreementColor),
-                      onChanged: agreementCheckFunction,
-                    ),
-                    new Padding(
-                      padding: EdgeInsets.only(right: 10.0),
-                    ),
-                    new Text(
-                      "Terms and Conditions",
-                      style: TextStyle(
-                        fontSize: 15.0,
-                        color: Colors.teal,
-                      ),
-                    ),
-                  ],
-                ),
+                Agreements(
+                    agreementCheck, agreementCheckFunction, checkboxColor),
+
                 // navigator
 
-                NextPageButton("/request_page"),
+                new Align(
+                  alignment: Alignment.topRight,
+                  child: new Container(
+                    width: 70,
+                    height: 70,
+                    margin: EdgeInsets.fromLTRB(0, 0, 0, 10),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.all(Radius.circular(70)),
+                      gradient: LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: [
+                          Color(0xff55ce23),
+                          Color(0xffbefd32),
+                        ],
+                      ),
+                    ),
+                    child: new IconButton(
+                      icon: Icon(
+                        Icons.keyboard_arrow_right,
+                        color: Colors.white,
+                      ),
+                      iconSize: 40.0,
+                      onPressed: (validForm()) ? navigatorFuntion : null,
+                    ),
+                  ),
+                ),
               ],
             ),
           ),

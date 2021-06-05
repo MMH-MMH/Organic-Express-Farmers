@@ -1,7 +1,12 @@
+import 'dart:convert';
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:organic/widget/next_page_button.dart';
 import 'package:organic/widget/text_field.dart';
 import 'package:organic/widget/top_banner.dart';
+import 'package:organic/services/authservice.dart';
+import 'package:localstorage/localstorage.dart';
 
 class RegisterPage extends StatefulWidget {
   RegisterPageState createState() => new RegisterPageState();
@@ -10,6 +15,8 @@ class RegisterPage extends StatefulWidget {
 class RegisterPageState extends State<RegisterPage> {
   bool gpsCheck = false;
   bool agreementCheck = false;
+
+  LocalStorage storage = new LocalStorage('organic');
 
   void gpsCheckFunction(bool gpsCheckCurrent) {
     setState(() {
@@ -22,6 +29,31 @@ class RegisterPageState extends State<RegisterPage> {
       agreementCheck = !agreementCheck;
     });
   }
+
+  navigatorFunction() async {
+    // print("Contact is $contact");
+
+    String token, to;
+
+    await AuthService().login(contact).then(
+          (res) => {
+            // token = (str.split('"')[11]).toString(),
+            token = res,
+            // print("Token --- $token"),
+            storage.setItem('token', token),
+            to = storage.getItem('token'),
+            // print("setStorage -- $to")
+          },
+        );
+
+    Navigator.of(context).pushNamed("/otp_verification_page");
+  }
+
+  String contact = "", indicatorText = "Enter your Contact";
+
+  bool disabled = true;
+
+  Color indicatorColor = Color(0xFF9E9E9E);
 
   @override
   Widget build(BuildContext context) {
@@ -44,63 +76,66 @@ class RegisterPageState extends State<RegisterPage> {
                       height: 50.0,
                     ),
 
-                    // Name of User
+                    // Contact Field
 
-                    CustomTextField(
-                      "Email",
-                      "",
-                      false, // isPassword
-                    ),
-
-                    new SizedBox(
-                      height: 30.0,
-                    ),
-
-                    //  DOB of User
-
-                    CustomTextField(
-                      "Password",
-                      "",
-                      true, // isPassword
-                    ),
-
-                    new SizedBox(
-                      height: 30.0,
-                    ),
-
-                    new Text(
-                      "OR",
-                      style: TextStyle(
-                        fontSize: 18.0,
-                        color: Colors.black54,
+                    new Theme(
+                      data: new ThemeData(
+                        primaryColor: Colors.black87,
+                      ),
+                      child: new TextField(
+                        obscureText: false,
+                        decoration: new InputDecoration(
+                          border: OutlineInputBorder(
+                            borderSide: new BorderSide(
+                              color: Colors.black,
+                            ),
+                          ),
+                          contentPadding: new EdgeInsets.symmetric(
+                            horizontal: 10.0,
+                          ),
+                          labelText: "Contact",
+                          prefixStyle: new TextStyle(
+                            color: Colors.black,
+                          ),
+                          prefixText: "+91 ",
+                          hintText: "Phone Number",
+                        ),
+                        onChanged: (value) {
+                          setState(() {
+                            contact = value;
+                            RegExp exp = RegExp(r'^[0-9]+$');
+                            int len = contact.length;
+                            if (len == 0) {
+                              indicatorText = "Enter your Contact";
+                              disabled = true;
+                              indicatorColor = Colors.grey;
+                            } else if (len != 10) {
+                              indicatorText = "Invalid Contact";
+                              disabled = true;
+                              indicatorColor = Colors.red;
+                            } else if (len == 10 && !exp.hasMatch(contact)) {
+                              indicatorText = "Invalid Contact";
+                              disabled = true;
+                            } else {
+                              indicatorText = "";
+                              disabled = false;
+                            }
+                          });
+                        },
                       ),
                     ),
-
-                    new SizedBox(
-                      height: 10.0,
-                    ),
-
-                    // Login Link
-
-                    FlatButton(
-                      color: Colors.transparent,
-                      splashColor: Colors.black26,
-                      onPressed: () {
-                        Navigator.of(context).pushNamed("/request_page");
-                      },
+                    SizedBox(height: 5),
+                    Align(
+                      alignment: Alignment.topLeft,
                       child: Text(
-                        'LOGIN',
-                        style: new TextStyle(
-                          fontSize: 18.0,
-                          color: Colors.black54,
+                        indicatorText,
+                        style: TextStyle(
+                          color: indicatorColor,
                         ),
                       ),
                     ),
-
-                    // navigator
-
                     new SizedBox(
-                      height: 70.0,
+                      height: 30.0,
                     ),
 
                     new Row(
@@ -113,7 +148,7 @@ class RegisterPageState extends State<RegisterPage> {
                               color: Colors.transparent,
                               splashColor: Colors.black26,
                               onPressed: () {
-                                Navigator.of(context).pushNamed("/login_page");
+                                Navigator.of(context).pushNamed("/");
                               },
                               child: Text(
                                 'Liscense and Agreements',
@@ -125,10 +160,42 @@ class RegisterPageState extends State<RegisterPage> {
                             ),
                           ),
                         ),
-
-                        // Register and detail page link
-                        new Expanded(
-                          child: NextPageButton("/register_detail_page"),
+                        new Align(
+                          alignment: Alignment.topRight,
+                          child: new Container(
+                            width: 70,
+                            height: 70,
+                            margin: EdgeInsets.fromLTRB(0, 0, 0, 10),
+                            decoration: BoxDecoration(
+                              borderRadius:
+                                  BorderRadius.all(Radius.circular(70)),
+                              gradient: disabled
+                                  ? (LinearGradient(
+                                      begin: Alignment.topCenter,
+                                      end: Alignment.bottomCenter,
+                                      colors: [
+                                        Color(0xFF9E9E9E),
+                                        Color(0xFFFFFFFF),
+                                      ],
+                                    ))
+                                  : (LinearGradient(
+                                      begin: Alignment.topCenter,
+                                      end: Alignment.bottomCenter,
+                                      colors: [
+                                        Color(0xff55ce23),
+                                        Color(0xffbefd32),
+                                      ],
+                                    )),
+                            ),
+                            child: new IconButton(
+                              icon: Icon(
+                                Icons.keyboard_arrow_right,
+                                color: Colors.white,
+                              ),
+                              iconSize: 40.0,
+                              onPressed: disabled ? null : navigatorFunction,
+                            ),
+                          ),
                         ),
                       ],
                     ),
