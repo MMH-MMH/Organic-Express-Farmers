@@ -70,7 +70,7 @@ class _LoaderState extends State<Loader> with SingleTickerProviderStateMixin {
             ),
             SizedBox(height: 10),
             new Container(
-              color: Colors.white,
+              color: Colors.teal,
               height: 3.0,
               width: animation.value * 100.0,
             ),
@@ -78,7 +78,7 @@ class _LoaderState extends State<Loader> with SingleTickerProviderStateMixin {
               padding: new EdgeInsets.only(bottom: 5.0),
             ),
             new Container(
-              color: Colors.white,
+              color: Colors.teal,
               height: 3.0,
               width: animation.value * 75.0,
             ),
@@ -86,7 +86,7 @@ class _LoaderState extends State<Loader> with SingleTickerProviderStateMixin {
               padding: new EdgeInsets.only(bottom: 5.0),
             ),
             new Container(
-              color: Colors.white,
+              color: Colors.teal,
               height: 3.0,
               width: ((animation.value < 0)
                       ? (-1 * animation.value)
