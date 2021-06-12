@@ -97,22 +97,19 @@ class ProfilePageState extends State<ProfilePage> {
         });
 
         AuthService().getinfo(contact).then((usr) async {
-          print("profile page userData -- $usr");
           setState(
             () {
               userData = usr['data'];
               infoloading = false;
-              // for (int i = 0; i < userData.length; i++) {
-              //   String s = userData[i]["status"];
-              //   s = s[0].toUpperCase() + s.substring(1);
-              //   userData[i]["status"] = s;
-              // }
             },
           );
           AuthService().getCropStatus(contact).then((res) {
-            print("profile page -- $res");
-
             setState(() {
+              for (int i = 0; i < res.length; i++) {
+                String s = res[i]['status'];
+                s = s[0].toUpperCase() + s.substring(1);
+                res[i]["status"] = s;
+              }
               if (res.length > 0) {
                 cropStatusWidget = (Column(
                   children: <Widget>[
@@ -142,7 +139,6 @@ class ProfilePageState extends State<ProfilePage> {
             });
           });
         });
-        print("getCropStatusHere -- $contact");
       });
     }
   }

@@ -23,11 +23,19 @@ class _HelpDeskState extends State<HelpDesk> {
   @override
   void initState() {
     super.initState();
-    messages = [
-      ChatMessage(
-          messageContent: AppLocalizations.of(context).dropProbs,
-          messageType: "receiver"),
-    ];
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+
+    setState(() {
+      messages = [
+        ChatMessage(
+            messageContent: AppLocalizations.of(context).dropProbs,
+            messageType: "receiver"),
+      ];
+    });
   }
 
   @override

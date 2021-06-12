@@ -51,7 +51,6 @@ class RegisterDetailPageState extends State<RegisterDetailPage> {
     ];
     for (String x in reqFields) {
       if ((data[x].toString()).length == 0) {
-        print("validation: false at - $x");
         Fluttertoast.showToast(
           msg: "Invalid Form",
           toastLength: Toast.LENGTH_SHORT,
@@ -63,7 +62,7 @@ class RegisterDetailPageState extends State<RegisterDetailPage> {
         return false;
       }
     }
-    print("validation: - ${agreementCheck.toString()}");
+
     if (agreementCheck == false) {
       Fluttertoast.showToast(
         msg: "Invalid Form",
@@ -125,7 +124,6 @@ class RegisterDetailPageState extends State<RegisterDetailPage> {
   }
 
   void navigatorFuntion() async {
-    print("contact -- $contact");
     var res;
     if (contact == null) {
       Fluttertoast.showToast(

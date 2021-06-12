@@ -31,8 +31,6 @@ class RegisterPageState extends State<RegisterPage> {
   }
 
   navigatorFunction() async {
-    print("Contact is $contact");
-
     setState(() {
       sending = true;
     });
@@ -42,13 +40,12 @@ class RegisterPageState extends State<RegisterPage> {
 
     res = await AuthService().login(contact);
     // token = (str.split('"')[11]).toString(),
-    print("Auth contact res -- $res");
+
     if (res[0]) {
       token = res[1];
-      print("Token --- $token");
+
       storage.setItem('token', token);
       to = storage.getItem('token');
-      print("setStorage -- $to");
 
       Navigator.of(context).pushNamed("/otp_verification_page");
     }
@@ -67,9 +64,8 @@ class RegisterPageState extends State<RegisterPage> {
   void initState() {
     storage.clear();
     super.initState();
-    print("register page contact ${storage.getItem('contact')}");
+
     storage.clear();
-    print("register page contact ${storage.getItem('contact')}");
   }
 
   @override

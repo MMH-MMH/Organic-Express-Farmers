@@ -11,21 +11,20 @@ class AuthService {
       "https://organic-express-farmer-backend.herokuapp.com/authenticate";
   // String uri = "https://192.168.43.220:4000/authenticate";
   login(contact) async {
-    print("AUth $contact");
     try {
-      Response res = await dio.post(uri,
-          data: {
-            "contact": contact,
-          },
-          options: Options(contentType: Headers.formUrlEncodedContentType));
+      // Response res = await dio.post(uri,
+      //     data: {
+      //       "contact": contact,
+      //     },
+      //     options: Options(contentType: Headers.formUrlEncodedContentType));
 
-      var data = jsonDecode(res.toString());
-      // var data = {
-      //   "msg": "Otp Sent Succesfully",
-      //   "token": "test",
-      //   "success": true,
-      //   "index": 2
-      // };
+      // var data = jsonDecode(res.toString());
+      var data = {
+        "msg": "Otp Sent Succesfully",
+        "token": "test",
+        "success": true,
+        "index": 2
+      };
       print(data);
       Fluttertoast.showToast(
         msg: data["msg"],
@@ -36,11 +35,8 @@ class AuthService {
         fontSize: 10,
       );
       if (data["success"]) {
-        print("Posted Contact $contact ,");
-
         return [true, data["token"]];
       } else {
-        print("Some error occurred");
         return [false];
       }
     } on DioError catch (err) {
@@ -60,22 +56,22 @@ class AuthService {
 
   verifyotp(otp, token) async {
     try {
-      dio.options.headers['Authorization'] = token;
-      Response res = await dio.post(uri + "/otpverify",
-          data: {
-            "otp": otp,
-          },
-          options: Options(contentType: Headers.formUrlEncodedContentType));
-      print("Otp response -- ${res.toString()}");
-      var data = jsonDecode(res.toString());
-      // var data = {
-      //   "success": true,
-      //   "msg": 'You are authorized',
-      //   "isregistered": true,
-      //   "contact": "+917408159898",
-      //   "name": "Shashwat"
-      // };
-      print("Otp data -- $data and ${data['success']}");
+      // dio.options.headers['Authorization'] = token;
+      // Response res = await dio.post(uri + "/otpverify",
+      //     data: {
+      //       "otp": otp,
+      //     },
+      //     options: Options(contentType: Headers.formUrlEncodedContentType));
+      // print("Otp response -- ${res.toString()}");
+      // var data = jsonDecode(res.toString());
+      var data = {
+        "success": true,
+        "msg": 'You are authorized',
+        "isregistered": true,
+        "contact": "+917408159898",
+        "name": "Shashwat"
+      };
+
       String send = "";
       if (data["success"]) {
         Fluttertoast.showToast(
@@ -107,7 +103,6 @@ class AuthService {
       send += data["contact"];
       send += " ";
       send += data["name"];
-      print("to send -- $send");
 
       return send;
     } on DioError catch (err) {
@@ -119,8 +114,6 @@ class AuthService {
         textColor: Colors.red,
         fontSize: 10,
       );
-      print("Otp error");
-      print(err.response);
     }
   }
 
@@ -132,41 +125,6 @@ class AuthService {
           },
           options: Options(contentType: Headers.formUrlEncodedContentType));
       var userData = jsonDecode(res.toString());
-
-      // Map<String, dynamic> userData = {
-      //   "contact": "+917408159898",
-      //   "name": "Shaswat gupta",
-      //   "registered": true,
-      //   "otp": "",
-      //   "anotherNumber": "8299506687",
-      //   "certificateNumber": "113",
-      //   "currAdd": "10",
-      //   "cropsList": ["rice", "wheat"],
-      //   "farmingType": ["Organic"],
-      //   "landSize": 10
-      // };
-
-      // String s = "";
-
-      // for (String e in userData["cropsList"]) {
-      //   s += e + ", ";
-      // }
-
-      // userData["cropsList"] = s.substring(0, s.length - 2);
-
-      // s = "";
-
-      // for (String e in userData["farmingType"]) {
-      //   s += e + ", ";
-      // }
-
-      // userData["farmingType"] = s.substring(0, s.length - 2);
-
-      // userData.forEach((key, value) {
-      //   userData[key] = value.toString();
-      // });
-
-      print("Info - $userData");
 
       var data = {"success": true, "msg": "Success", "data": userData};
 
@@ -211,7 +169,7 @@ class AuthService {
       //   "success": true,
       //   "msg": "Invalid user Data",
       // };
-      print("register data $data");
+
       if (data["success"]) {
         Fluttertoast.showToast(
           msg: "Successfully Registered",
@@ -249,12 +207,11 @@ class AuthService {
   }
 
   getTypeList(type) async {
-    print("getTypeList AuthService");
     var items = {
       "Seeds": ['S1', 'S2', 'S3', 'S4', 'S5'],
       "Bio-Fertilizers": ['BF1', 'BF2', 'BF3', 'BF4', 'BF5']
     };
-    print("getTypeList AuthService $items");
+
     return items;
   }
 
@@ -298,8 +255,6 @@ class AuthService {
   }
 
   updateStatus(sendData) async {
-    print("CropsStatus -- $sendData");
-
     Response res = await dio.post(
       uri + "/updateStatus",
       data: {
@@ -321,8 +276,6 @@ class AuthService {
   }
 
   getCropStatus(contact) async {
-    print("CropsStatus -- $contact");
-
     Response res = await dio.post(
       uri + "/getCropStatus",
       data: {
@@ -331,8 +284,6 @@ class AuthService {
     );
 
     var data = jsonDecode(res.toString());
-
-    print("data: $data");
 
     if (data["success"]) {
       Fluttertoast.showToast(

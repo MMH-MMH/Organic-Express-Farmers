@@ -4,6 +4,7 @@ import 'package:localstorage/localstorage.dart';
 import 'package:organic/services/authservice.dart';
 import 'package:organic/widget/dropdown.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:organic/widget/loader.dart';
 
 class RequestSeed extends StatefulWidget {
   _RequestSeedState createState() => _RequestSeedState();
@@ -12,7 +13,7 @@ class RequestSeed extends StatefulWidget {
 class _RequestSeedState extends State<RequestSeed> {
   LocalStorage storage = LocalStorage('organic');
   String type = 'Seeds', qty, subType = 'Select Items you want', submitText;
-  bool loading;
+  bool loading = true;
   List<String> selected;
   Map<String, List<String>> typeList, selList;
   int selectLen = 0;
@@ -21,21 +22,21 @@ class _RequestSeedState extends State<RequestSeed> {
 
   int getLen(String type) {
     List<String> list = typeList[type];
-    return (list == null ? 0 : list.length);
+    int len = (list == null ? 0 : list.length);
+    if (typeList[type].contains('No items left')) len--;
+    return len;
   }
 
   Widget requestItemsWidget;
 
   void getTypeList() {
     AuthService().getTypeList('Seeds').then((items) {
-      print("item --  $items");
       typeList = items;
-      print("typeList --  $typeList");
+
       subType = typeList['Seeds'][0];
 
-      print("subType --  $subType");
       selList = {'Seeds': [], 'Bio-Fertilizers': []};
-      print("selList --  $selList");
+
       setState(() {
         loading = false;
         // any list should not be zero
@@ -44,20 +45,15 @@ class _RequestSeedState extends State<RequestSeed> {
   }
 
   String getType(String item) {
-    print(item);
-    print(selList);
     if (selList['Seeds'].contains(item)) {
-      print("Seeds");
       return 'Seeds';
     } else {
-      print("Bio-Fertilizers");
       return 'Bio-Fertilizers';
     }
   }
 
   submit() {
     setState(() {
-      print("here $data");
       submitText = AppLocalizations.of(context).sending;
     });
 
@@ -77,7 +73,7 @@ class _RequestSeedState extends State<RequestSeed> {
     }
 
     Map<String, String> requests;
-    print("data $data");
+
     for (String item in selected) {
       if (data[item] == null) {
         Fluttertoast.showToast(
@@ -111,12 +107,9 @@ class _RequestSeedState extends State<RequestSeed> {
       if (requests[item] == null) requests[item] = "";
 
       requests[item] = data[item];
-      print("new requests data -- $requests");
     }
 
     String contact = storage.getItem('contact');
-
-    print("Sending request ${[requests, contact]}");
 
     AuthService().sendRequest([requests, contact]).then((res) {
       setState(() {
@@ -129,12 +122,14 @@ class _RequestSeedState extends State<RequestSeed> {
 
   void initState() {
     super.initState();
-    submitText = AppLocalizations.of(context).submit;
-    setState(() {
-      loading = true;
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      getTypeList();
+      setState(() {
+        loading = true;
+        submitText = AppLocalizations.of(context).submit;
+      });
     });
-    print("Here");
-    WidgetsBinding.instance.addPostFrameCallback((_) => getTypeList());
   }
 
   @override
@@ -150,10 +145,7 @@ class _RequestSeedState extends State<RequestSeed> {
 
           margin: EdgeInsets.symmetric(horizontal: 40),
           child: loading
-              ? Text(
-                  AppLocalizations.of(context).loading,
-                  style: loadingStyle,
-                )
+              ? Loader()
               : (Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   crossAxisAlignment: CrossAxisAlignment.center,
@@ -194,9 +186,7 @@ class _RequestSeedState extends State<RequestSeed> {
                             if (getLen(type) == 0) {
                               // means selected.length > 0
                               setState(() {
-                                typeList[type] = [
-                                  'You have selected all items of this type'
-                                ];
+                                typeList[type] = ['No items left'];
                               });
                             } else {
                               setState(() {
@@ -212,15 +202,13 @@ class _RequestSeedState extends State<RequestSeed> {
                                   selected.add(val);
                                 // selected.add(val);
                                 selectLen += 1;
-                                print(selList);
                               });
                             }
-                            if (getLen(type) == 0) {
-                              typeList[type] = [
-                                'You have selected all items of this type'
-                              ];
-                            }
+
                             setState(() {
+                              if (getLen(type) == 0) {
+                                typeList[type] = ['No items left'];
+                              }
                               subType = typeList[type][0];
                             });
                           },
@@ -255,11 +243,18 @@ class _RequestSeedState extends State<RequestSeed> {
                                           setState(() {
                                             selectLen -= 1;
                                             selected.remove(product);
+                                            String ctype = getType(product);
+
                                             typeList[getType(product)]
                                                 .add(product);
                                             selList[getType(product)]
                                                 .remove(product);
-                                            print(selList);
+                                            if (typeList[ctype]
+                                                .contains("No items left")) {
+                                              typeList[ctype]
+                                                  .remove("No items left");
+                                              subType = typeList[type][0];
+                                            }
                                           });
                                         },
                                       )),
@@ -269,7 +264,6 @@ class _RequestSeedState extends State<RequestSeed> {
                                       if (data[product] == null)
                                         data[product] = "";
                                       data[product] = val;
-                                      print("new data -- $data");
                                     });
                                   },
                                 );
