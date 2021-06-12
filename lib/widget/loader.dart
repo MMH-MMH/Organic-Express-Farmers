@@ -10,13 +10,28 @@ class _LoaderState extends State<Loader> with SingleTickerProviderStateMixin {
   AnimationController controller;
   Animation<double> animation;
 
+  double an = 0;
+
   @override
   void initState() {
     super.initState();
-    controller =
-        AnimationController(duration: Duration(milliseconds: 200), vsync: this);
-    animation = CurvedAnimation(parent: controller, curve: Curves.easeIn);
-    animation.addStatusListener((AnimationStatus status) {});
+    controller = new AnimationController(
+      duration: new Duration(milliseconds: 1000),
+      vsync: this,
+    );
+    animation = new CurvedAnimation(
+      parent: controller,
+      curve: Curves.elasticOut,
+    );
+    animation.addListener(() {
+      this.setState(() {});
+    });
+    animation.addStatusListener((AnimationStatus status) {
+      this.setState(() {
+        an = animation.value;
+        an = (an < 0) ? (an * -1) : an;
+      });
+    });
     controller.repeat();
   }
 
@@ -54,22 +69,29 @@ class _LoaderState extends State<Loader> with SingleTickerProviderStateMixin {
               ),
             ),
             SizedBox(height: 10),
-            Container(
-              color: Colors.teal,
+            new Container(
+              color: Colors.white,
               height: 3.0,
               width: animation.value * 100.0,
             ),
-            SizedBox(height: 2),
-            Container(
-              color: Colors.teal,
+            new Padding(
+              padding: new EdgeInsets.only(bottom: 5.0),
+            ),
+            new Container(
+              color: Colors.white,
               height: 3.0,
               width: animation.value * 75.0,
             ),
-            SizedBox(height: 2),
-            Container(
-              color: Colors.teal,
+            new Padding(
+              padding: new EdgeInsets.only(bottom: 5.0),
+            ),
+            new Container(
+              color: Colors.white,
               height: 3.0,
-              width: animation.value * 50.0,
+              width: ((animation.value < 0)
+                      ? (-1 * animation.value)
+                      : (animation.value)) *
+                  50.0,
             ),
           ],
         ),
