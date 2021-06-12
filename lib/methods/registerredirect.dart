@@ -29,6 +29,7 @@ class Methods {
                     SizedBox(height: 10),
                     ElevatedButton(
                         child: Text("Click here to register"),
+                        style: ElevatedButton.styleFrom(primary: Colors.teal),
                         onPressed: () {
                           Navigator.of(context).pushNamed('/register_page');
                         }),
@@ -42,6 +43,4 @@ class Methods {
       );
     }
   }
-
-  
 }

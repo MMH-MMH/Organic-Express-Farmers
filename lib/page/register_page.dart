@@ -1,12 +1,11 @@
-import 'dart:convert';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
-import 'package:organic/widget/next_page_button.dart';
-import 'package:organic/widget/text_field.dart';
+
 import 'package:organic/widget/top_banner.dart';
 import 'package:organic/services/authservice.dart';
 import 'package:localstorage/localstorage.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class RegisterPage extends StatefulWidget {
   RegisterPageState createState() => new RegisterPageState();
@@ -15,6 +14,7 @@ class RegisterPage extends StatefulWidget {
 class RegisterPageState extends State<RegisterPage> {
   bool gpsCheck = false;
   bool agreementCheck = false;
+  bool sending = false;
 
   LocalStorage storage = new LocalStorage('organic');
 
@@ -31,29 +31,46 @@ class RegisterPageState extends State<RegisterPage> {
   }
 
   navigatorFunction() async {
-    // print("Contact is $contact");
+    print("Contact is $contact");
+
+    setState(() {
+      sending = true;
+    });
 
     String token, to;
+    var res;
 
-    await AuthService().login(contact).then(
-          (res) => {
-            // token = (str.split('"')[11]).toString(),
-            token = res,
-            // print("Token --- $token"),
-            storage.setItem('token', token),
-            to = storage.getItem('token'),
-            // print("setStorage -- $to")
-          },
-        );
+    res = await AuthService().login(contact);
+    // token = (str.split('"')[11]).toString(),
+    print("Auth contact res -- $res");
+    if (res[0]) {
+      token = res[1];
+      print("Token --- $token");
+      storage.setItem('token', token);
+      to = storage.getItem('token');
+      print("setStorage -- $to");
 
-    Navigator.of(context).pushNamed("/otp_verification_page");
+      Navigator.of(context).pushNamed("/otp_verification_page");
+    }
+    setState(() {
+      sending = false;
+    });
   }
 
-  String contact = "", indicatorText = "Enter your Contact";
+  String contact = "", indicatorText = "";
 
   bool disabled = true;
 
   Color indicatorColor = Color(0xFF9E9E9E);
+
+  @override
+  void initState() {
+    storage.clear();
+    super.initState();
+    print("register page contact ${storage.getItem('contact')}");
+    storage.clear();
+    print("register page contact ${storage.getItem('contact')}");
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -62,8 +79,11 @@ class RegisterPageState extends State<RegisterPage> {
         child: new Column(
           children: <Widget>[
             TopBanner(
-              "Create a free account",
-              "Create account by filling details below",
+              AppLocalizations.of(context).createAFreeAccount,
+              // "CreateAFreeAccount",
+              // "Create account by filling details below",
+              AppLocalizations.of(context).createAccountByFillingDetailsBelow,
+              // Language().getString("Create account by filling details below"),
             ),
             new Container(
               margin: EdgeInsets.symmetric(
@@ -93,32 +113,40 @@ class RegisterPageState extends State<RegisterPage> {
                           contentPadding: new EdgeInsets.symmetric(
                             horizontal: 10.0,
                           ),
-                          labelText: "Contact",
+                          labelText: AppLocalizations.of(context).contact,
                           prefixStyle: new TextStyle(
                             color: Colors.black,
                           ),
                           prefixText: "+91 ",
-                          hintText: "Phone Number",
+                          hintText: AppLocalizations.of(context).phoneNumber,
                         ),
                         onChanged: (value) {
                           setState(() {
                             contact = value;
                             RegExp exp = RegExp(r'^[0-9]+$');
                             int len = contact.length;
+
                             if (len == 0) {
-                              indicatorText = "Enter your Contact";
+                              indicatorText =
+                                  AppLocalizations.of(context).enterYourContact;
+
                               disabled = true;
                               indicatorColor = Colors.grey;
                             } else if (len != 10) {
-                              indicatorText = "Invalid Contact";
+                              indicatorText =
+                                  AppLocalizations.of(context).invalidContact;
+
                               disabled = true;
                               indicatorColor = Colors.red;
                             } else if (len == 10 && !exp.hasMatch(contact)) {
-                              indicatorText = "Invalid Contact";
+                              indicatorText =
+                                  AppLocalizations.of(context).invalidContact;
+
                               disabled = true;
                             } else {
                               indicatorText = "";
                               disabled = false;
+                              indicatorColor = Colors.black;
                             }
                           });
                         },
@@ -134,70 +162,26 @@ class RegisterPageState extends State<RegisterPage> {
                         ),
                       ),
                     ),
+
                     new SizedBox(
-                      height: 30.0,
+                      height: 20,
                     ),
 
-                    new Row(
-                      // Lincenses and Agreements link
-                      children: <Widget>[
-                        new Expanded(
-                          child: new Align(
-                            alignment: Alignment.topLeft,
-                            child: new FlatButton(
-                              color: Colors.transparent,
-                              splashColor: Colors.black26,
-                              onPressed: () {
-                                Navigator.of(context).pushNamed("/");
-                              },
-                              child: Text(
-                                'Liscense and Agreements',
-                                style: new TextStyle(
-                                  fontSize: 15.0,
-                                  color: Colors.blue,
-                                ),
-                              ),
-                            ),
-                          ),
+                    new ElevatedButton(
+                      onPressed: disabled ? null : navigatorFunction,
+                      style: ElevatedButton.styleFrom(
+                        primary: sending ? Colors.grey : Colors.teal,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(25.0),
                         ),
-                        new Align(
-                          alignment: Alignment.topRight,
-                          child: new Container(
-                            width: 70,
-                            height: 70,
-                            margin: EdgeInsets.fromLTRB(0, 0, 0, 10),
-                            decoration: BoxDecoration(
-                              borderRadius:
-                                  BorderRadius.all(Radius.circular(70)),
-                              gradient: disabled
-                                  ? (LinearGradient(
-                                      begin: Alignment.topCenter,
-                                      end: Alignment.bottomCenter,
-                                      colors: [
-                                        Color(0xFF9E9E9E),
-                                        Color(0xFFFFFFFF),
-                                      ],
-                                    ))
-                                  : (LinearGradient(
-                                      begin: Alignment.topCenter,
-                                      end: Alignment.bottomCenter,
-                                      colors: [
-                                        Color(0xff55ce23),
-                                        Color(0xffbefd32),
-                                      ],
-                                    )),
-                            ),
-                            child: new IconButton(
-                              icon: Icon(
-                                Icons.keyboard_arrow_right,
-                                color: Colors.white,
-                              ),
-                              iconSize: 40.0,
-                              onPressed: disabled ? null : navigatorFunction,
-                            ),
-                          ),
+                      ),
+                      child: Padding(
+                        padding: EdgeInsets.fromLTRB(20, 10, 20, 10),
+                        child: Text(
+                          AppLocalizations.of(context).getOtp,
+                          style: TextStyle(fontSize: 18),
                         ),
-                      ],
+                      ),
                     ),
                   ],
                 ),

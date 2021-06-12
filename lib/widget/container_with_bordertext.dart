@@ -14,8 +14,9 @@ class ContainerWithBorderTextState extends State<ContainerWithBorderText> {
     return new Stack(
       children: <Widget>[
         Container(
-          margin: EdgeInsets.only(top: 20),
+          margin: EdgeInsets.symmetric(vertical: 20, horizontal: 10),
           padding: EdgeInsets.only(bottom: 10, top: 20),
+          width: MediaQuery.of(context).size.width * 0.8,
           decoration: BoxDecoration(
             border: Border.all(color: Colors.grey[400], width: 1),
             borderRadius: BorderRadius.circular(0),
@@ -31,7 +32,7 @@ class ContainerWithBorderTextState extends State<ContainerWithBorderText> {
             color: Colors.grey[100],
             child: Text(
               widget.borderText,
-              style: TextStyle(color: Colors.grey[700], fontSize: 18),
+              style: TextStyle(color: Colors.teal, fontSize: 18),
             ),
           ),
         ),

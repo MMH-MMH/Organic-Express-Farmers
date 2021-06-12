@@ -3,6 +3,7 @@ import 'package:organic/dialogBoxes/procurement_change.dart';
 import 'package:organic/dialogBoxes/procurement_update.dart';
 import 'package:organic/dialogBoxes/request_seed.dart';
 import 'package:organic/widget/show_dialog.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class RequestList extends StatefulWidget {
   RequestListState createState() => new RequestListState();
@@ -49,10 +50,11 @@ class RequestListState extends State<RequestList> {
             children: [
               Expanded(
                 child: Text(
-                  "Request seed, bio fertilizers",
+                  AppLocalizations.of(context).requestItems,
+                  // "Request seed, bio fertilizers",
                   style: TextStyle(
                     fontSize: 13,
-                    color: Colors.black54,
+                    color: Colors.black87,
                   ),
                 ),
               ),
@@ -62,7 +64,7 @@ class RequestListState extends State<RequestList> {
                   icon: Icon(
                     Icons.keyboard_arrow_down_sharp,
                     size: 30,
-                    color: Colors.black54,
+                    color: Colors.black87,
                   ),
                   onPressed: showReqDiag,
                 ),
@@ -78,10 +80,10 @@ class RequestListState extends State<RequestList> {
             children: [
               Expanded(
                 child: Text(
-                  "Procurement update",
+                  AppLocalizations.of(context).changeProcurement,
                   style: TextStyle(
                     fontSize: 13,
-                    color: Colors.black54,
+                    color: Colors.black87,
                   ),
                 ),
               ),
@@ -91,9 +93,9 @@ class RequestListState extends State<RequestList> {
                   icon: Icon(
                     Icons.keyboard_arrow_down_sharp,
                     size: 30,
-                    color: Colors.black54,
+                    color: Colors.black87,
                   ),
-                  onPressed: showProcChangeDiag,
+                  onPressed: showProcUpdateDiag,
                 ),
               ),
             ],
@@ -107,10 +109,10 @@ class RequestListState extends State<RequestList> {
             children: [
               Expanded(
                 child: Text(
-                  "Change Procurement date and quality",
+                  AppLocalizations.of(context).upcomingSchedule,
                   style: TextStyle(
                     fontSize: 13,
-                    color: Colors.black54,
+                    color: Colors.black87,
                   ),
                 ),
               ),
@@ -120,9 +122,9 @@ class RequestListState extends State<RequestList> {
                   icon: Icon(
                     Icons.keyboard_arrow_down_sharp,
                     size: 30,
-                    color: Colors.black54,
+                    color: Colors.black87,
                   ),
-                  onPressed: showProcUpdateDiag,
+                  onPressed: showProcChangeDiag,
                 ),
               ),
             ],

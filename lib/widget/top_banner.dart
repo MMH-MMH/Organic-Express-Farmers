@@ -9,16 +9,17 @@ class TopBanner extends StatefulWidget {
 class TopBannerState extends State<TopBanner> {
   @override
   Widget build(BuildContext context) {
+    // change();
     return new Container(
       width: MediaQuery.of(context).size.width,
-      height: MediaQuery.of(context).size.height * 0.4,
+      height: MediaQuery.of(context).size.height * 0.5,
       decoration: BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
           colors: [
-            Color(0xff55ce23),
-            Color(0xffbefd32),
+            Colors.teal,
+            Colors.teal[200],
           ],
         ),
       ),
@@ -34,34 +35,13 @@ class TopBannerState extends State<TopBanner> {
                 new Column(
                   children: <Widget>[
                     new SizedBox(
-                      height: MediaQuery.of(context).size.height * 0.2,
+                      height: MediaQuery.of(context).size.height * 0.4,
                     ),
                     new Text(
                       widget.title,
                       style: new TextStyle(
                         color: Colors.white,
                         fontSize: 35.0,
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-            new Row(
-              children: <Widget>[
-                new SizedBox(
-                  width: MediaQuery.of(context).size.width * 0.025,
-                ),
-                new Column(
-                  children: <Widget>[
-                    new SizedBox(
-                      height: 10.0,
-                    ),
-                    new Text(
-                      widget.description,
-                      style: new TextStyle(
-                        color: Colors.white,
-                        fontSize: 15.0,
                       ),
                     ),
                   ],

@@ -1,9 +1,23 @@
+import 'dart:ffi';
+
 import 'package:flutter/material.dart';
+import 'package:localstorage/localstorage.dart';
 import 'package:organic/l10n/l10n.dart';
 import 'package:organic/provider/locale_provider.dart';
 import 'package:provider/provider.dart';
 
-class LanguagePickerWidget extends StatelessWidget {
+class LanguagePickerWidget extends StatefulWidget {
+  _LanguagePickerWidgetState createState() => _LanguagePickerWidgetState();
+}
+
+class _LanguagePickerWidgetState extends State<LanguagePickerWidget> {
+  LocalStorage storage = LocalStorage('organic');
+
+  @override
+  void initState() {
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     final provider = Provider.of<LocaleProvider>(context);
@@ -37,7 +51,8 @@ class LanguagePickerWidget extends StatelessWidget {
                 onTap: () {
                   final provider =
                       Provider.of<LocaleProvider>(context, listen: false);
-
+                  storage.setItem('language', locale.toString());
+                  print("Language -- ${storage.getItem('language')}");
                   provider.setLocale(locale);
                 },
               );

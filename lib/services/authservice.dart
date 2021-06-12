@@ -6,9 +6,12 @@ import 'package:fluttertoast/fluttertoast.dart';
 
 class AuthService {
   Dio dio = new Dio();
-  String uri = "http://localhost:5000/authenticate";
+  // String uri = "http://localhost:4000/authenticate";
+  String uri =
+      "https://organic-express-farmer-backend.herokuapp.com/authenticate";
+  // String uri = "https://192.168.43.220:4000/authenticate";
   login(contact) async {
-    print("AUth");
+    print("AUth $contact");
     try {
       Response res = await dio.post(uri,
           data: {
@@ -28,25 +31,27 @@ class AuthService {
         msg: data["msg"],
         toastLength: Toast.LENGTH_SHORT,
         gravity: ToastGravity.BOTTOM,
-        backgroundColor: Colors.green,
-        textColor: Colors.white,
+        backgroundColor: Colors.grey[100],
+        textColor: Colors.grey[500],
         fontSize: 10,
       );
       if (data["success"]) {
         print("Posted Contact $contact ,");
 
-        return data["token"];
+        return [true, data["token"]];
       } else {
         print("Some error occurred");
+        return [false];
       }
     } on DioError catch (err) {
+      print("error - ${err.response.data}");
       Fluttertoast.showToast(
-        msg: err.response.data["msg"],
-        toastLength: Toast.LENGTH_SHORT,
+        msg: "server-side error, Please retry",
+        toastLength: Toast.LENGTH_LONG,
         gravity: ToastGravity.BOTTOM,
-        backgroundColor: Colors.red,
-        textColor: Colors.white,
-        fontSize: 10,
+        backgroundColor: Colors.grey[100],
+        textColor: Colors.red,
+        fontSize: 15,
       );
       print("Auth error");
       print(err.response);
@@ -66,9 +71,9 @@ class AuthService {
       // var data = {
       //   "success": true,
       //   "msg": 'You are authorized',
-      //   "isregistered": false,
+      //   "isregistered": true,
       //   "contact": "+917408159898",
-      //   "name": "abcd"
+      //   "name": "Shashwat"
       // };
       print("Otp data -- $data and ${data['success']}");
       String send = "";
@@ -77,8 +82,8 @@ class AuthService {
           msg: data['msg'],
           toastLength: Toast.LENGTH_SHORT,
           gravity: ToastGravity.BOTTOM,
-          backgroundColor: Colors.green,
-          textColor: Colors.white,
+          backgroundColor: Colors.grey[100],
+          textColor: Colors.grey[500],
           fontSize: 10,
         );
         send += "1";
@@ -87,8 +92,8 @@ class AuthService {
           msg: data['msg'],
           toastLength: Toast.LENGTH_LONG,
           gravity: ToastGravity.CENTER,
-          backgroundColor: Colors.red,
-          textColor: Colors.black,
+          backgroundColor: Colors.grey[100],
+          textColor: Colors.red,
           fontSize: 10,
         );
         send += "0";
@@ -110,8 +115,8 @@ class AuthService {
         msg: err.response.data["msg"],
         toastLength: Toast.LENGTH_SHORT,
         gravity: ToastGravity.BOTTOM,
-        backgroundColor: Colors.red,
-        textColor: Colors.white,
+        backgroundColor: Colors.grey[100],
+        textColor: Colors.red,
         fontSize: 10,
       );
       print("Otp error");
@@ -119,27 +124,77 @@ class AuthService {
     }
   }
 
-  getinfo(token) async {
-    dio.options.headers['Authorization'] = token;
+  getinfo(contact) async {
     try {
       Response res = await dio.post(uri + "/getinfo",
           data: {
-            "token": token,
+            "contact": contact,
           },
           options: Options(contentType: Headers.formUrlEncodedContentType));
-      var data = jsonDecode(res.toString());
+      var userData = jsonDecode(res.toString());
+
+      // Map<String, dynamic> userData = {
+      //   "contact": "+917408159898",
+      //   "name": "Shaswat gupta",
+      //   "registered": true,
+      //   "otp": "",
+      //   "anotherNumber": "8299506687",
+      //   "certificateNumber": "113",
+      //   "currAdd": "10",
+      //   "cropsList": ["rice", "wheat"],
+      //   "farmingType": ["Organic"],
+      //   "landSize": 10
+      // };
+
+      // String s = "";
+
+      // for (String e in userData["cropsList"]) {
+      //   s += e + ", ";
+      // }
+
+      // userData["cropsList"] = s.substring(0, s.length - 2);
+
+      // s = "";
+
+      // for (String e in userData["farmingType"]) {
+      //   s += e + ", ";
+      // }
+
+      // userData["farmingType"] = s.substring(0, s.length - 2);
+
+      // userData.forEach((key, value) {
+      //   userData[key] = value.toString();
+      // });
+
+      print("Info - $userData");
+
+      var data = {"success": true, "msg": "Success", "data": userData};
 
       if (data["success"]) {
-        return [data["name"], data["contact"]];
+        return userData;
       } else {
+        Fluttertoast.showToast(
+          msg: "Successfully Registered",
+          toastLength: Toast.LENGTH_SHORT,
+          gravity: ToastGravity.BOTTOM,
+          backgroundColor: Colors.grey[100],
+          textColor: Colors.grey[500],
+          fontSize: 10,
+        );
         return "";
       }
     } on DioError catch (err) {
       // Fluttertoast.showToast(
       //   msg: err.response.data['msg'],
       // );
-      print("Otp error");
-      print(err.response);
+      Fluttertoast.showToast(
+        msg: err.response.data["msg"],
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.BOTTOM,
+        backgroundColor: Colors.grey[100],
+        textColor: Colors.red,
+        fontSize: 10,
+      );
     }
   }
 
@@ -152,14 +207,18 @@ class AuthService {
         },
       );
       var data = jsonDecode(res.toString());
+      // var data = {
+      //   "success": true,
+      //   "msg": "Invalid user Data",
+      // };
       print("register data $data");
       if (data["success"]) {
         Fluttertoast.showToast(
           msg: "Successfully Registered",
           toastLength: Toast.LENGTH_SHORT,
           gravity: ToastGravity.BOTTOM,
-          backgroundColor: Colors.green[800],
-          textColor: Colors.white,
+          backgroundColor: Colors.grey[100],
+          textColor: Colors.grey[500],
           fontSize: 10,
         );
         return true;
@@ -168,7 +227,7 @@ class AuthService {
           msg: data["msg"],
           toastLength: Toast.LENGTH_SHORT,
           gravity: ToastGravity.BOTTOM,
-          backgroundColor: Colors.green[800],
+          backgroundColor: Colors.grey[100],
           textColor: Colors.red,
           fontSize: 10,
         );
@@ -182,10 +241,118 @@ class AuthService {
         msg: err.response.data['msg'],
         toastLength: Toast.LENGTH_SHORT,
         gravity: ToastGravity.BOTTOM,
-        backgroundColor: Colors.green[800],
+        backgroundColor: Colors.grey[100],
         textColor: Colors.red,
         fontSize: 10,
       );
     }
+  }
+
+  getTypeList(type) async {
+    print("getTypeList AuthService");
+    var items = {
+      "Seeds": ['S1', 'S2', 'S3', 'S4', 'S5'],
+      "Bio-Fertilizers": ['BF1', 'BF2', 'BF3', 'BF4', 'BF5']
+    };
+    print("getTypeList AuthService $items");
+    return items;
+  }
+
+  sendRequest(sendData) async {
+    var toSend = {"contact": sendData[1], "items": sendData[0]};
+
+    Response res = await dio.post(
+      uri + "/requestItems",
+      data: {
+        "data": toSend,
+      },
+    );
+
+    var data = await jsonDecode(res.toString());
+
+    // var data = {
+    //   "success": true,
+    //   "msg": "Request successfully sent",
+    // };
+
+    if (data["success"]) {
+      Fluttertoast.showToast(
+        msg: data['msg'],
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.BOTTOM,
+        backgroundColor: Colors.grey[100],
+        textColor: Colors.grey[500],
+        fontSize: 10,
+      );
+    } else {
+      Fluttertoast.showToast(
+        msg: data['msg'],
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.BOTTOM,
+        backgroundColor: Colors.grey[100],
+        textColor: Colors.red,
+        fontSize: 10,
+      );
+    }
+    return data["success"].toString();
+  }
+
+  updateStatus(sendData) async {
+    print("CropsStatus -- $sendData");
+
+    Response res = await dio.post(
+      uri + "/updateStatus",
+      data: {
+        "data": sendData,
+      },
+    );
+
+    var data = await jsonDecode(res.toString());
+    if (data["success"]) {
+      Fluttertoast.showToast(
+        msg: "Updated Successfully",
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.BOTTOM,
+        backgroundColor: Colors.grey[100],
+        textColor: Colors.grey[500],
+        fontSize: 10,
+      );
+    }
+  }
+
+  getCropStatus(contact) async {
+    print("CropsStatus -- $contact");
+
+    Response res = await dio.post(
+      uri + "/getCropStatus",
+      data: {
+        "contact": contact,
+      },
+    );
+
+    var data = jsonDecode(res.toString());
+
+    print("data: $data");
+
+    if (data["success"]) {
+      Fluttertoast.showToast(
+        msg: data['msg'],
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.BOTTOM,
+        backgroundColor: Colors.grey[100],
+        textColor: Colors.grey[500],
+        fontSize: 10,
+      );
+    } else {
+      Fluttertoast.showToast(
+        msg: data['msg'],
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.BOTTOM,
+        backgroundColor: Colors.grey[100],
+        textColor: Colors.red,
+        fontSize: 10,
+      );
+    }
+    return data["cropStatus"];
   }
 }

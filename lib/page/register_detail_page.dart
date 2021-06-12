@@ -3,10 +3,13 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:localstorage/localstorage.dart';
 import 'package:organic/methods/registerredirect.dart';
 import 'package:organic/services/authservice.dart';
+import 'package:organic/widget/dropdown.dart';
 import 'package:organic/widget/liscenseAndAgreements.dart';
+import 'package:organic/widget/navbar.dart';
 import 'package:organic/widget/next_page_button.dart';
-import 'package:organic/widget/profile_pic.dart';
+import 'package:organic/widget/profile_pic_picker.dart';
 import 'package:organic/widget/text_field.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class RegisterDetailPage extends StatefulWidget {
   RegisterDetailPageState createState() => new RegisterDetailPageState();
@@ -17,39 +20,59 @@ class RegisterDetailPageState extends State<RegisterDetailPage> {
   List<String> farmingType = [];
 
   LocalStorage storage = LocalStorage('organic');
-  String contact;
+  String contact, landSizeUnit = "Acre";
 
   Widget nullContact;
 
   var data = {
     "name": "",
-    "costAdd": "",
+    "currAdd": "",
     "anotherNumber": "",
     "landSize": "",
+    "landSizeUnit": "Acre",
     "cropsList": "",
     "certificateNumber": "",
     "farmingType": [],
     "contact": "",
   };
 
-  List<String> reqFields = [
-    "name",
-    "costAdd",
-    "landSize",
-    "cropList",
-    "certificateNumber",
-    "darmingType",
-    "contact"
-  ];
+  List<String> reqFields;
 
   ////   SOME METHODS //////////
 
   bool validForm() {
+    reqFields = [
+      "name",
+      "currAdd",
+      "landSize",
+      "cropList",
+      "darmingType",
+      "contact"
+    ];
     for (String x in reqFields) {
       if ((data[x].toString()).length == 0) {
-        print("validation: false");
+        print("validation: false at - $x");
+        Fluttertoast.showToast(
+          msg: "Invalid Form",
+          toastLength: Toast.LENGTH_SHORT,
+          gravity: ToastGravity.BOTTOM,
+          backgroundColor: Colors.grey[100],
+          textColor: Colors.red[800],
+          fontSize: 10,
+        );
         return false;
       }
+    }
+    print("validation: - ${agreementCheck.toString()}");
+    if (agreementCheck == false) {
+      Fluttertoast.showToast(
+        msg: "Invalid Form",
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.BOTTOM,
+        backgroundColor: Colors.grey[100],
+        textColor: Colors.red[800],
+        fontSize: 10,
+      );
     }
     return (agreementCheck == true);
   }
@@ -77,10 +100,13 @@ class RegisterDetailPageState extends State<RegisterDetailPage> {
   void organicCheckFunction(bool organicCheckCurrent) {
     setState(() {
       organicCheck = !organicCheck;
-      if (organicCheck)
+      if (organicCheck) {
+        reqFields.add("certificateNumber");
         farmingType.add("Organic");
-      else
+      } else {
         farmingType.remove("Organic");
+        reqFields.remove("certificateNumber");
+      }
 
       data["farmingType"] = farmingType;
     });
@@ -103,11 +129,11 @@ class RegisterDetailPageState extends State<RegisterDetailPage> {
     var res;
     if (contact == null) {
       Fluttertoast.showToast(
-        msg: "First verify your Contact in previous step",
+        msg: "Verify your Contact in previous step",
         toastLength: Toast.LENGTH_SHORT,
         gravity: ToastGravity.BOTTOM,
-        backgroundColor: Colors.red,
-        textColor: Colors.white,
+        backgroundColor: Colors.grey[100],
+        textColor: Colors.red[800],
         fontSize: 10,
       );
       Navigator.of(context).pushNamed("/register_page");
@@ -154,23 +180,13 @@ class RegisterDetailPageState extends State<RegisterDetailPage> {
           child: new Center(
             child: new Column(
               children: <Widget>[
+                // Navbar(),
                 new SizedBox(
                   height: 50,
                 ),
 
                 // Add Profile Picture
-                new ClipRRect(
-                  borderRadius: BorderRadius.all(
-                    Radius.circular(75.0),
-                  ),
-                  child: Image.network(
-                    '1.jpeg',
-                    // width: 300,
-                    height: 150,
-                    width: 150,
-                    fit: BoxFit.fill,
-                  ),
-                ),
+                ProfilePic(contact),
                 new SizedBox(
                   height: MediaQuery.of(context).size.height * 0.05,
                 ),
@@ -178,7 +194,8 @@ class RegisterDetailPageState extends State<RegisterDetailPage> {
                 // Name of User
 
                 CustomTextField(
-                  "Name*", // labeltext
+                  (AppLocalizations.of(context).name + "*")
+                      .toString(), // labeltext
                   "", // hinttext
                   false, // isPassword
                   (val) {
@@ -193,9 +210,10 @@ class RegisterDetailPageState extends State<RegisterDetailPage> {
                 ),
 
                 CustomTextField(
-                  "Cost Add*", "", false, // isPassword
+                  (AppLocalizations.of(context).currAdd + "*").toString(), "",
+                  false, // isPassword
                   (val) {
-                    data["costAdd"] = val;
+                    data["currAdd"] = val;
                   },
                 ),
 
@@ -204,7 +222,8 @@ class RegisterDetailPageState extends State<RegisterDetailPage> {
                 ),
 
                 CustomTextField(
-                  "Another number", "", false, // isPassword
+                  (AppLocalizations.of(context).anotherNumber), "",
+                  false, // isPassword
                   (val) {
                     data["anotherNumber"] = val;
                   },
@@ -214,12 +233,63 @@ class RegisterDetailPageState extends State<RegisterDetailPage> {
                   height: 30.0,
                 ),
 
-                CustomTextField(
-                  "Land Size*", "", false, // isPassword
-                  (val) {
-                    data["landSize"] = val;
-                  },
+                // ///////// Land Size /////
+
+                // Row(
+                //   mainAxisAlignment: MainAxisAlignment.start,
+                //   children: <Widget>[
+                //     Align(
+                //       alignment: Alignment.topLeft,
+                //       child:
+
+                Row(
+                  children: <Widget>[
+                    Expanded(
+                      child: Theme(
+                        data: new ThemeData(
+                          primaryColor: Colors.black87,
+                        ),
+                        child: new TextField(
+                          onChanged: (val) {
+                            data["landSize"] = val;
+                          },
+                          decoration: new InputDecoration(
+                            border: OutlineInputBorder(
+                              borderSide: new BorderSide(
+                                color: Colors.black,
+                              ),
+                            ),
+                            contentPadding: new EdgeInsets.symmetric(
+                              horizontal: 10.0,
+                            ),
+                            labelText: AppLocalizations.of(context).landSize,
+                            prefixStyle: new TextStyle(
+                              color: Colors.black,
+                            ),
+                            hintText: "",
+                          ),
+                        ),
+                      ),
+                    ),
+                    SizedBox(width: 10),
+                    Dropdown(
+                      ['Acre', 'Hectare'],
+                      (String newVal) {
+                        setState(() {
+                          landSizeUnit = newVal;
+                          data["landSizeUnit"] = landSizeUnit;
+                        });
+                      },
+                      landSizeUnit,
+                    ),
+                  ],
                 ),
+
+                SizedBox(height: 10),
+                // ),
+
+                //   ],
+                // ),
 
                 new SizedBox(
                   height: 30.0,
@@ -228,7 +298,8 @@ class RegisterDetailPageState extends State<RegisterDetailPage> {
                 // //////// CROPS YOU GROW ////////
 
                 CustomTextField(
-                  "Crops you grow*", "", false, // isPassword
+                  AppLocalizations.of(context).cropsYouGrow + "*", "",
+                  false, // isPassword
                   (val) {
                     data["cropsList"] = val;
                   },
@@ -241,7 +312,7 @@ class RegisterDetailPageState extends State<RegisterDetailPage> {
                 Align(
                   alignment: Alignment.topLeft,
                   child: Text(
-                    "If you grow rice and wheat, enter rice,wheat",
+                    AppLocalizations.of(context).cropsListDesc,
                     style: TextStyle(
                       color: Colors.grey,
                     ),
@@ -256,7 +327,7 @@ class RegisterDetailPageState extends State<RegisterDetailPage> {
                 Align(
                   alignment: Alignment.topLeft,
                   child: Text(
-                    "Choose you farming type*",
+                    AppLocalizations.of(context).chooseFarming + "*",
                     style: TextStyle(
                       color: Colors.black,
                       fontSize: 18,
@@ -269,7 +340,7 @@ class RegisterDetailPageState extends State<RegisterDetailPage> {
                 new Row(
                   children: <Widget>[
                     new Text(
-                      "Organic",
+                      AppLocalizations.of(context).organic,
                       style: TextStyle(
                         fontSize: 18.0,
                       ),
@@ -284,13 +355,25 @@ class RegisterDetailPageState extends State<RegisterDetailPage> {
                           MaterialStateProperty.resolveWith(checkboxColor),
                       onChanged: organicCheckFunction,
                     ),
+                    SizedBox(width: 20),
+                    if (organicCheck == true)
+                      Expanded(
+                        child: CustomTextField(
+                          AppLocalizations.of(context).certificate + "*",
+                          "",
+                          false,
+                          (val) {
+                            data["certificateNumber"] = val;
+                          },
+                        ),
+                      ),
                   ],
                 ),
 
                 new Row(
                   children: <Widget>[
                     new Text(
-                      "Inrganic",
+                      AppLocalizations.of(context).inorganic,
                       style: TextStyle(
                         fontSize: 18.0,
                       ),
@@ -312,18 +395,9 @@ class RegisterDetailPageState extends State<RegisterDetailPage> {
 
                 ////////// CERTIFICATE NUMBER ///////////
 
-                CustomTextField(
-                  "Certificate Number*",
-                  "",
-                  false,
-                  (val) {
-                    data["certificateNumber"] = val;
-                  },
-                ),
-
-                new SizedBox(
-                  height: 10.0,
-                ),
+                // new SizedBox(
+                //   height: 10.0,
+                // ),
 
                 // Terms and Conditions
 
@@ -344,8 +418,8 @@ class RegisterDetailPageState extends State<RegisterDetailPage> {
                         begin: Alignment.topCenter,
                         end: Alignment.bottomCenter,
                         colors: [
-                          Color(0xff55ce23),
-                          Color(0xffbefd32),
+                          Colors.teal,
+                          Colors.teal[200],
                         ],
                       ),
                     ),

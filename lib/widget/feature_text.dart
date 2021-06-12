@@ -15,13 +15,14 @@ class FeatureTextState extends State<FeatureText> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
           widget.feature,
+          SizedBox(height: 4),
           Divider(
             height: 2.0,
             thickness: 2,
             indent: widget.indent,
             endIndent: widget.endindent,
           ),
-          SizedBox(height: 10),
+          SizedBox(height: 15),
         ],
       ),
     );

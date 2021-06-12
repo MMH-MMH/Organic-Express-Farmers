@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:organic/dialogBoxes/notifications.dart';
 import 'package:organic/widget/show_dialog.dart';
+import 'package:organic/widget/top_banner.dart';
 
 class SearchBar extends StatefulWidget {
   SearchBarState createState() => new SearchBarState();
@@ -20,37 +21,25 @@ class SearchBarState extends State<SearchBar> {
   Widget build(BuildContext context) {
     return new Row(
       children: <Widget>[
-        new Theme(
-          data: new ThemeData(
-            primaryColor: Colors.black87,
-          ),
-          child: new Expanded(
-            child: new TextFormField(
-              obscureText: false,
-              decoration: new InputDecoration(
-                border: new OutlineInputBorder(
-                  borderRadius: new BorderRadius.circular(0),
-                  borderSide: new BorderSide(),
-                ),
-                contentPadding: new EdgeInsets.symmetric(
-                  horizontal: 10.0,
-                ),
-                suffixIcon: new IconButton(
-                  icon: Icon(
-                    Icons.search,
-                  ),
-                  onPressed: null,
-                ),
-                hintText: "Organic Express",
+        Expanded(
+          child: Center(
+            child: Text(
+              "Organic Express",
+              style: TextStyle(
+                color: Colors.teal,
+                fontSize: 18,
               ),
             ),
           ),
         ),
         IconButton(
           icon: Icon(
-            Icons.notifications_sharp,
+            Icons.notifications,
+            color: Colors.teal,
           ),
-          onPressed: showNotifications,
+          onPressed: () {
+            showNotifications();
+          },
         ),
       ],
     );

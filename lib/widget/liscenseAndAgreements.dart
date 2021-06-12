@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class Agreements extends StatefulWidget {
   Agreements(
@@ -25,7 +26,7 @@ class _AgreementsState extends State<Agreements> {
           padding: EdgeInsets.only(right: 10.0),
         ),
         new Text(
-          "Terms and Conditions",
+          AppLocalizations.of(context).termsConditions,
           style: TextStyle(
             fontSize: 15.0,
             color: Colors.teal,

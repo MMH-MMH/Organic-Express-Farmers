@@ -1,30 +1,42 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter/services.dart';
+import 'package:localstorage/localstorage.dart';
+import 'package:organic/methods/isauthenticated.dart';
+import 'package:organic/services/authservice.dart';
 
-class ProfilePic extends StatefulWidget {
-  ProfilePicState createState() => new ProfilePicState();
+class ShowProfilePic extends StatefulWidget {
+  _ShowProfilePicState createState() => _ShowProfilePicState();
 }
 
-class ProfilePicState extends State<ProfilePic> {
+class _ShowProfilePicState extends State<ShowProfilePic> {
+  LocalStorage storage = LocalStorage('organic');
+
+  @override
+  void initState() {
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
-    return new ClipRRect(
-      borderRadius: BorderRadius.all(
-        Radius.circular(75.0),
-      ),
-      child: MouseRegion(
-        cursor: SystemMouseCursors.click,
-        child: GestureDetector(
-          onTap: () {
-            Navigator.of(context).pushNamed("/profile_page");
-          },
-          child: Image.network(
-            '1.jpeg',
-            // width: 300,
-            height: 100,
-            width: 100,
-            fit: BoxFit.fill,
+    return Container(
+      height: 100,
+      child: ClipRRect(
+        borderRadius: BorderRadius.only(
+          bottomLeft: Radius.circular(50),
+          topLeft: Radius.circular(50),
+          topRight: Radius.circular(50),
+          bottomRight: Radius.circular(50),
+        ),
+        child: MouseRegion(
+          cursor: SystemMouseCursors.click,
+          child: GestureDetector(
+            onTap: () {
+              // getImage();
+            },
+            child: Image.network(
+              'https://static.thenounproject.com/png/3237155-200.png',
+              fit: BoxFit.fill,
+            ),
           ),
         ),
       ),
